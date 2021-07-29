@@ -22,7 +22,7 @@ export default function Form() {
   // Modal prevents me to use RHF. I need to register it here and watch for changes on the input itself.
   useEffect(() => {
     // TODO add validation for pdf file name no dot in name etc...
-    methods.register('newDocumentName', { required: "Please, provide a valid name" })
+    methods.register('newDocumentName', { required: "You must provide a valid file name" })
   }, [])
 
   async function mergeDocuments() {
@@ -73,7 +73,7 @@ function Error({children}) {
 
 function DocumentAction({action, children}) {
   return (
-    <button onClick={action} className="inline-flex items-center px-1.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{children}</button>
+    <button onClick={action} className="inline-flex items-center px-1.5 py-1.5 border border-transparent rounded bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{children}</button>
   )
 }
 
@@ -104,7 +104,7 @@ function Documents() {
       <input type="file" id="pdf" className="hidden" accept=".pdf" onChange={(e) => (e.target.files[0] ? append({id: uniqueId(), file: e.target.files[0]}) : null)} />
       <label
         htmlFor="pdf"
-        className="relative block w-full border-2 border-gray-300 border-dashed rounded-lg p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-0"
+        className="relative cursor-pointer block w-full border-2 border-gray-300 border-dashed rounded-lg p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-0"
       >
         {icons.pdf}
         <span className="mt-2 block text-sm font-medium text-gray-900">Add new PDF</span>
@@ -116,7 +116,7 @@ function Documents() {
 function Input() {
   const {setValue} = useFormContext()
   return (
-    <div className="relative border border-gray-300 rounded-md px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600">
+    <div className="relative border border-gray-300 rounded-md px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-[#46406F] focus-within:border-[#46406F]">
       <label
         htmlFor="name"
         className="absolute -top-2 left-2 -mt-px inline-block px-1 bg-white text-xs font-medium text-gray-900"
@@ -191,14 +191,14 @@ function Modal({open, setOpen, submit, errors}) {
               <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#5E5889] text-base font-medium text-white hover:bg-[#46406F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#46406F] sm:col-start-2 sm:text-sm"
                   onClick={submit}
                 >
                   Merge
                 </button>
                 <button
                   type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#46406F] sm:mt-0 sm:col-start-1 sm:text-sm"
                   onClick={() => setOpen(false)}
                   ref={cancelButtonRef}
                 >
