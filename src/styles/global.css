@@ -3,3 +3,7 @@
   src: url("/fonts/font.woff");
   font-display: swap;
 }
+
+body {
+  margin: 0px;
+}

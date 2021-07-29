@@ -2,6 +2,7 @@ import { useRef, useState, Fragment, useEffect } from "react"
 import { uniqueId } from "lodash"
 import { Dialog, Transition } from '@headlessui/react'
 import { useForm, FormProvider, useFormContext, useFieldArray } from "react-hook-form";
+import PDFMerger from 'pdf-merger-js/browser';
 
 const icons = {
   down: <svg xmlns="http://www.w3.org/2000/svg" className="fill-current text-[#ffaf23]" width="16" height="16" viewBox="0 0 24 24"><path d="M12 24l-8-9h6v-15h4v15h6z"/></svg>,
@@ -21,29 +22,52 @@ export default function Form() {
   // Modal prevents me to use RHF. I need to register it here and watch for changes on the input itself.
   useEffect(() => {
     // TODO add validation for pdf file name no dot in name etc...
-    methods.register('newDocumentName', { required: true })
+    methods.register('newDocumentName', { required: "Please, provide a valid name" })
   }, [])
 
-  function mergeDocuments() {
+  async function mergeDocuments() {
+    const error = await methods.trigger(["newDocumentName"])
     console.log("hi")
   }
 
   return (
     <FormProvider {...methods} >
       <form className="w-full xs:w-11/12 md:w-9/12 space-y-16" onSubmit={methods.handleSubmit(mergeDocuments)}>
-        <PDFModal open={open} setOpen={setOpen}/>
-        <div className="mt-10 space-y-4 bg-white rounded-lg mx-auto p-5">
+        <Modal open={open} setOpen={setOpen} submit={methods.handleSubmit(mergeDocuments)} errors={methods.formState.errors.newDocumentName}/>
+        <div className="mt-10 bg-white rounded-lg mx-auto p-5">
           <Documents />
+          {methods.formState.errors.documents && methods.watch("documents").length < 2 && <Error>{methods.formState.errors.documents.message}</Error>}
         </div>
         <div className="flex justify-center">
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={async () => {
+              if (methods.getValues("documents").length >= 2) {
+                setOpen(true)
+              } else {
+                methods.setError("documents", {type: "manual", message: "You must provide at least two pdf files"})
+              }
+            }}
             className="w-max text-center inline-flex items-center px-4 py-2 border border-transparent text-lg rounded-md shadow-sm text-white bg-[#E02B20] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E02B20] font-bold tracking-wider">Merge
           </button>
         </div>
       </form>
     </FormProvider>
+  )
+}
+
+function Error({children}) {
+  return (
+    <div className="rounded-md bg-red-50 p-4 mt-4">
+      <div className="flex items-center">
+        <div className="flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" className="fill-current text-red-800" width="14" height="14" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.151 17.943l-4.143-4.102-4.117 4.159-1.833-1.833 4.104-4.157-4.162-4.119 1.833-1.833 4.155 4.102 4.106-4.16 1.849 1.849-4.1 4.141 4.157 4.104-1.849 1.849z"/></svg>
+        </div>
+        <div className="ml-3">
+          <h3 className="text-sm font-medium text-red-800">{children}</h3>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -60,7 +84,7 @@ function Documents() {
 
   return (
     <>
-      <ul className="space-y-3">
+      {fields.length > 0 && <ul className="space-y-3 mb-4">
         {fields.map((field, index) => (
           <li key={field.id} className="bg-white shadow overflow-hidden rounded-md px-6 py-4 flex justify-between items-center">
             {/* I keep the old version adviced by RHF 7 in case of troubles */}
@@ -76,7 +100,7 @@ function Documents() {
             </div>
           </li>
         ))}
-      </ul>
+      </ul>}
       <input type="file" id="pdf" className="hidden" accept=".pdf" onChange={(e) => (e.target.files[0] ? append({id: uniqueId(), file: e.target.files[0]}) : null)} />
       <label
         htmlFor="pdf"
@@ -101,6 +125,7 @@ function Input() {
       </label>
       <div className="flex">
         <input
+          autoComplete="off"
           type="text"
           onChange={e => setValue("newDocumentName", e.target.value)}
           name="name"
@@ -116,15 +141,7 @@ function Input() {
   )
 }
 
-function PDFModal({open, setOpen}) {
-  return (
-    <Modal title="Confirmation" open={open} setOpen={setOpen}>
-      <Input />
-    </Modal>
-  )
-}
-
-function Modal({open, setOpen, title, children}) {
+function Modal({open, setOpen, submit, errors}) {
 
   const cancelButtonRef = useRef(null)
 
@@ -166,17 +183,16 @@ function Modal({open, setOpen, title, children}) {
           >
             <div className="w-full inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:p-6">
               <div className="mt-3 text-center">
-                <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
-                  {title}
-                </Dialog.Title>
                 <div className="mt-3">
-                  {children}
+                  <Input />
                 </div>
               </div>
+              {errors && <Error>{errors.message}</Error>}
               <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button
-                  type="submit"
+                  type="button"
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
+                  onClick={submit}
                 >
                   Merge
                 </button>
