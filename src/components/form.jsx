@@ -1,4 +1,4 @@
-import { useRef, useState, Fragment } from "react"
+import { useRef, useState, Fragment, useEffect } from "react"
 import { uniqueId } from "lodash"
 import { Dialog, Transition } from '@headlessui/react'
 import { useForm, FormProvider, useFormContext, useFieldArray } from "react-hook-form";
@@ -12,8 +12,17 @@ const icons = {
 
 export default function Form() {
   const [open, setOpen] = useState(false)
+  const methods = useForm({
+    defaultValues: {
+      newDocumentName: "",
+    }
+  });
 
-  const methods = useForm();
+  // Modal prevents me to use RHF. I need to register it here and watch for changes on the input itself.
+  useEffect(() => {
+    // TODO add validation for pdf file name no dot in name etc...
+    methods.register('newDocumentName', { required: true })
+  }, [])
 
   function mergeDocuments() {
     console.log("hi")
@@ -53,15 +62,13 @@ function Documents() {
     <>
       <ul className="space-y-3">
         {fields.map((field, index) => (
-          <li key={field.id} className="bg-white shadow overflow-hidden rounded-md px-6 py-4 flex justify-between">
+          <li key={field.id} className="bg-white shadow overflow-hidden rounded-md px-6 py-4 flex justify-between items-center">
             {/* I keep the old version adviced by RHF 7 in case of troubles */}
             {/* <input
               {...register(`documents[${index}].name`)}
               defaultValue={`${field.file.name}`}
             /> */}
-            <p>
-              {field.file.name}
-            </p>
+            {field.file.name}
             <div className="space-x-2 flex items-center">
               {index > 0 && <DocumentAction action={() => swap(index, index - 1)}>{icons.up}</DocumentAction>}
               {index < (fields.length - 1) && <DocumentAction action={() => swap(index, index + 1)} >{icons.down}</DocumentAction>}
@@ -74,7 +81,6 @@ function Documents() {
       <label
         htmlFor="pdf"
         className="relative block w-full border-2 border-gray-300 border-dashed rounded-lg p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-0"
-
       >
         {icons.pdf}
         <span className="mt-2 block text-sm font-medium text-gray-900">Add new PDF</span>
@@ -84,6 +90,7 @@ function Documents() {
 }
 
 function Input() {
+  const {setValue} = useFormContext()
   return (
     <div className="relative border border-gray-300 rounded-md px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600">
       <label
@@ -95,6 +102,7 @@ function Input() {
       <div className="flex">
         <input
           type="text"
+          onChange={e => setValue("newDocumentName", e.target.value)}
           name="name"
           id="name"
           className="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none sm:text-sm"
