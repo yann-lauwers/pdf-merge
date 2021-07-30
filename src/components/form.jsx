@@ -71,10 +71,17 @@ export default function Form() {
   }, [])
 
   async function mergeDocuments() {
-    const isNoError = await methods.trigger(["newDocumentName"])
     const docs = methods.getValues("documents")
     const name = methods.getValues("newDocumentName")
-    if (isNoError) return mergePDF(docs, name)
+
+    await methods.trigger(["newDocumentName"])
+
+    if (!methods.formState.errors?.newDocumentName) {
+      mergePDF(docs, name)
+      methods.reset({ documents: [], newDocumentName: "" })
+      onClose()
+      return console.log("It's merged! Thanks for using Yann Lauwers's solution (🇧🇪)")
+    }
     return "error"
   }
 
@@ -219,10 +226,6 @@ export function Input({ onSubmit, onClose }) {
           onKeyDown={e => {
             if (e.key === "Enter") {
               onSubmit()
-              if (formState.isSubmitSuccessful) {
-                reset({ documents: [], newDocumentName: "" })
-                onClose()
-              }
             }
           }}
           name="name"

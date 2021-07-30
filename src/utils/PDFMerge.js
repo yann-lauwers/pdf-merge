@@ -4,7 +4,6 @@ export async function mergePDF(documents, newPdfName) {
   const merger = new PDFMerger()
   await Promise.all(
     documents.map(async doc => {
-      console.log(doc.file, doc.id)
       await merger.add(doc.file)
     })
   )
