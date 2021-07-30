@@ -1,0 +1,5 @@
+.Toastify__toast-body,
+.Toastify__toast--default {
+  padding: 0px !important;
+  margin: 0px !important ;
+}

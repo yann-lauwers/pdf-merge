@@ -4,6 +4,7 @@ import { useForm, FormProvider, useFormContext, useFieldArray } from "react-hook
 import { mergePDF } from "../utils/PDFMerge"
 import { useDisclosure } from "@chakra-ui/react"
 import { ConfirmationModal } from "./modal"
+import { successToast, Toast } from "./alerts"
 
 const icons = {
   down: (
@@ -71,18 +72,20 @@ export default function Form() {
   }, [])
 
   async function mergeDocuments() {
-    const docs = methods.getValues("documents")
-    const name = methods.getValues("newDocumentName")
+    try {
+      const docs = methods.getValues("documents")
+      const name = methods.getValues("newDocumentName")
 
-    await methods.trigger(["newDocumentName"])
-
-    if (!methods.formState.errors?.newDocumentName) {
-      mergePDF(docs, name)
-      methods.reset({ documents: [], newDocumentName: "" })
-      onClose()
-      return console.log("It's merged! Thanks for using Yann Lauwers's solution (🇧🇪)")
+      await methods.trigger(["newDocumentName"])
+      if (!methods.formState.errors?.newDocumentName) {
+        mergePDF(docs, name)
+        methods.reset({ documents: [], newDocumentName: "" })
+        onClose()
+        successToast()
+      }
+    } catch (err) {
+      console.err(err)
     }
-    return "error"
   }
 
   return (
@@ -116,6 +119,7 @@ export default function Form() {
             Merge
           </button>
         </div>
+        <Toast />
       </form>
     </FormProvider>
   )
@@ -171,14 +175,15 @@ function Documents() {
             >
               {field.file.name}
               <div className="space-x-2 flex items-center">
-                {index > 0 && (
+                {/* Doesn't work */}
+                {/* {index > 0 && (
                   <DocumentAction action={() => swap(index, index - 1)}>{icons.up}</DocumentAction>
                 )}
                 {index < fields.length - 1 && (
                   <DocumentAction action={() => swap(index, index + 1)}>
                     {icons.down}
                   </DocumentAction>
-                )}
+                )} */}
                 <DocumentAction action={() => remove(index)}>{icons.cross}</DocumentAction>
               </div>
             </li>
