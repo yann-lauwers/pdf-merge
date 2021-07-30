@@ -70,8 +70,6 @@ export default function Form() {
     })
   }, [])
 
-  console.log(fileNameRegex.test("hi"))
-
   async function mergeDocuments() {
     const isNoError = await methods.trigger(["newDocumentName"])
     const docs = methods.getValues("documents")
